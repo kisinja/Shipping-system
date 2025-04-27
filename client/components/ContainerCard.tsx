@@ -160,7 +160,13 @@ const ContainerCard: React.FC<ContainerCardProps> = ({
                                 ) : (
                                     <>
                                         <ShoppingCartIcon className="w-5 h-5" />
-                                        Book This Container
+                                        <form onSubmit={() => {
+                                            "use server";
+                                            handleBooking(container.id);
+                                        }}>
+                                            <button type="submit">
+                                                Book this container</button>
+                                        </form>
                                     </>
                                 )}
                             </button>
