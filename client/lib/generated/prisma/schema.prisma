@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * model User {
+ * id         String      @id @default(auto()) @map("_id") @db.ObjectId
+ * kindeId    String?     @unique
+ * name       String
+ * email      String      @unique
+ * role       UserRole    @default(CLIENT)
+ * containers Container[]
+ * shipments  Shipment[]
+ * createdAt  DateTime    @default(now())
+ * updatedAt  DateTime    @updatedAt
+ * }
+ */
+
+enum UserRole {
+  ADMIN
+  CLIENT
+  OPERATOR
+}
+
+model Container {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  containerId   String          @unique
+  size          String
+  containerType String
+  location      String
+  status        ContainerStatus @default(AVAILABLE)
+  currentPort   String
+  userId        String?
+  shipments     Shipment[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+enum ContainerStatus {
+  AVAILABLE
+  IN_TRANSIT
+  BOOKED
+  MAINTENANCE
+}
+
+model Shipment {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  shipmentCode  String         @unique
+  origin        String
+  destination   String
+  status        ShipmentStatus @default(PENDING)
+  departureDate DateTime
+  arrivalDate   DateTime?
+  containerId   String         @db.ObjectId
+  container     Container      @relation(fields: [containerId], references: [id])
+  userId        String
+  logs          Log[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+enum ShipmentStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Log {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  shipmentId String   @db.ObjectId
+  shipment   Shipment @relation(fields: [shipmentId], references: [id])
+  message    String
+  timestamp  DateTime @default(now())
+}
+
+model Port {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  location  String
+  country   String
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

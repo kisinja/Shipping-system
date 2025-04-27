@@ -1,0 +1,126 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated"
+}
+
+enum ContainerStatus {
+  AVAILABLE // Ready for booking
+  BOOKED // Reserved by client
+  IN_TRANSIT // Currently shipping
+  READY_FOR_SHIPMENT
+  AT_PORT // Waiting at intermediate port
+  DELIVERED // Reached final destination
+  MAINTENANCE // Undergoing repairs
+}
+
+model Container {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  containerId String          @unique // External ID (e.g., "MSKU123456")
+  size        String // "20ft", "40ft", etc.
+  type        String // "Dry", "Reefer", "Open Top", etc.
+  currentPort String // Current location (port code)
+  status      ContainerStatus @default(AVAILABLE)
+  bookingDate DateTime? // When client booked it
+  userId      String?
+  shipment    Shipment? // Active shipment
+  shipmentId  String?         @db.ObjectId
+  goods       Goods[] // Items inside container
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+enum ShipmentStatus {
+  PENDING // Created but not yet departed
+  IN_TRANSIT // On the way
+  AT_PORT // At intermediate port
+  CUSTOMS_HOLD // Undergoing inspection
+  DELIVERED // Reached destination
+  CANCELLED // Shipment aborted
+}
+
+model Shipment {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  shipmentCode     String         @unique // Your tracking number (e.g., "SH-2023-AB123")
+  origin           String // Starting port
+  destination      String // Target port
+  currentPort      String // Current location
+  status           ShipmentStatus @default(PENDING)
+  departureDate    DateTime? // When it left origin
+  estimatedArrival DateTime? // Predicted arrival
+  actualArrival    DateTime? // Real arrival time
+  containerId      String         @unique @db.ObjectId
+  container        Container      @relation(fields: [containerId], references: [id])
+  userId           String
+  logs             Log[] // History of events
+  documents        Document[] // Shipping docs
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  Goods            Goods[]
+
+  /**
+   * For Live tracking
+   */
+  currentLatitude  Float? // Current latitude
+  currentLongitude Float? // Current longitude
+  gpsUpdates       GpsUpdate[] // GPS history
+}
+
+model GpsUpdate {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  shipmentId String   @db.ObjectId
+  shipment   Shipment @relation(fields: [shipmentId], references: [id])
+  latitude   Float
+  longitude  Float
+  timestamp  DateTime @default(now())
+  speed      Float? // Speed in knots
+  heading    Int? // Direction in degrees
+}
+
+model Goods {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  description String // Item description
+  quantity    Int
+  weight      Float // In kg
+  value       Float // Declared value
+  containerId String    @db.ObjectId
+  container   Container @relation(fields: [containerId], references: [id])
+  shipmentId  String    @db.ObjectId
+  shipment    Shipment  @relation(fields: [shipmentId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+model Log {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  shipmentId String   @db.ObjectId
+  shipment   Shipment @relation(fields: [shipmentId], references: [id])
+  message    String // "Departed from Shanghai"
+  location   String? // Port code if location change
+  status     String? // Optional status update
+  timestamp  DateTime @default(now())
+}
+
+model Document {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String // "Bill of Lading"
+  type       String // "invoice", "permit", etc.
+  url        String // Link to S3/Cloud Storage
+  shipmentId String   @db.ObjectId
+  shipment   Shipment @relation(fields: [shipmentId], references: [id])
+  uploadedAt DateTime @default(now())
+}
+
+model Port {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  code      String   @unique // UN/LOCODE (e.g., "CNNGB")
+  name      String // "Port of Shanghai"
+  country   String
+  city      String
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+}
