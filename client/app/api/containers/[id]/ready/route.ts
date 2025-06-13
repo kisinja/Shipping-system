@@ -1,6 +1,5 @@
 import { prismaClient } from "@/utils";
 import { NextResponse } from "next/server";
-import { ShipmentStatus } from "@prisma/client";
 
 type Params = Promise<{
     id: string;
@@ -51,7 +50,7 @@ export async function GET(req: Request, { params }: { params: Params }) {
             prismaClient.shipment.update({
                 where: { containerId: containerId },
                 data: {
-                    status: ShipmentStatus.IN_TRANSIT,
+                    status: 'IN_TRANSIT',
                     departureDate: new Date(),
                     updatedAt: new Date()
                 }
@@ -63,7 +62,7 @@ export async function GET(req: Request, { params }: { params: Params }) {
             data: {
                 shipmentId: updatedShipment.id,
                 message: `Container marked ready for shipment with ${container.goods.length} items`,
-                status: ShipmentStatus.IN_TRANSIT,
+                status: 'IN_TRANSIT',
                 location: container.currentPort
             }
         });
