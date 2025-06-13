@@ -18,7 +18,8 @@ const useUserRole = () => {
       });
       const data = await res.json();
       console.log(data);
-      setUserRole(data.roles[0].key);
+      const {key} = Array.isArray(data.roles) ? data.roles[0] : '';
+      setUserRole(key);
     };
     fetchRoles();
   }, [user?.id]);

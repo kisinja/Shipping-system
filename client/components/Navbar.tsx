@@ -19,6 +19,7 @@ const Navbar = () => {
   const userImg = user?.picture || "/default-user.jpg";
 
   const userRole = useUserRole();
+  console.log(userRole);
 
   return (
     <nav className="flex justify-between items-center py-4 bg-white px-6 md:px-8 lg:px-12 xl:px-24 shadow-sm border-b border-slate-100">
