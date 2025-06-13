@@ -34,3 +34,19 @@ export const steps = [
     { step: "3", label: "Track Your Shipment" },
     { step: "4", label: "Manage Deliveries" },
 ];
+
+export const generateContainerId = () => {
+    const prefix = 'SVS';
+    const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `${prefix}-${randomPart}-${datePart}`;
+}
+
+/* const shipments = await prismaClient.shipment.findMany({
+        include:{
+            container:true,
+        },
+        orderBy:{
+            createdAt: 'desc',
+        }
+    }); */

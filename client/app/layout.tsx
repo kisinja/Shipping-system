@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mark Ships LTD",
+  title: "SavoStore LTD",
   description: "Shipping made easy for everyone!",
 };
 

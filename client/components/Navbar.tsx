@@ -26,10 +26,10 @@ const Navbar = () => {
       {/* Logo */}
       <Link href="/" className="flex items-center">
         <Image
-          src="/logo.jpg"
+          src="/logo.png"
           alt="Logo"
-          width={120}
-          height={60}
+          width={150}
+          height={150}
           className="h-10 w-auto object-contain"
         />
       </Link>
@@ -38,14 +38,24 @@ const Navbar = () => {
         {/* Nav Links - Only visible when user is logged in */}
         {user && (
           <div className="hidden md:flex gap-6 text-sm font-medium text-slate-700">
-            <NavLink href="/dashboard">Dashboard</NavLink>
-            <NavLink href="/dashboard/bookings/new">Book Container</NavLink>
-            <NavLink href="/dashboard/containers">My Containers</NavLink>
-            <NavLink href="/dashboard/shipments">Shipments</NavLink>
-            <NavLink href="/dashboard/track">Track Container</NavLink>
+            {userRole !== "admin" && (
+              <NavLink href="/dashboard">Dashboard</NavLink>
+            )}
+            {userRole !== "admin" && (
+              <NavLink href="/dashboard/bookings/new">Book Container</NavLink>
+            )}
+            {userRole !== "admin" && (
+              <NavLink href="/dashboard/track">Track Container</NavLink>
+            )}
 
             {userRole === "admin" && (
-              <NavLink href="/admin/create">Create Container</NavLink>
+              <>
+                <NavLink href="/admin/containers/create">
+                  Create Container
+                </NavLink>
+                <NavLink href="/admin/containers">All Containers</NavLink>
+                <NavLink href="/admin/shipments">All Shipments</NavLink>
+              </>
             )}
           </div>
         )}

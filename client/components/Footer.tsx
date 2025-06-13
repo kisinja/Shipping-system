@@ -6,7 +6,7 @@ const Footer = () => {
     return (
         <footer className="py-10 px-6 bg-gray-900 text-gray-300 text-center">
             <p className="font-medium mb-2">
-                &copy; {currentYear} Mark Ships. All rights reserved.
+                &copy; {currentYear} SavoStore. All rights reserved.
             </p>
             <div className="space-x-4">
                 <Link href="/terms">Terms</Link>
